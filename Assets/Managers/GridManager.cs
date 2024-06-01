@@ -154,7 +154,7 @@ namespace Managers
                     tileMap.SetTile(new Vector3Int(x, y ,0), _tileSet[tileID] );
                     
                     var tile = Instantiate(nodeBasePrefab,grid.transform);
-                    tile.Init(true, new SquareCoords{Pos = new Vector2(x, y)});
+                    tile.Init(tileID is not (0 or 3), new SquareCoords{Pos = new Vector2(x, y)});
                     Tiles.Add(new Vector2(x,y),tile);
                 }
             }

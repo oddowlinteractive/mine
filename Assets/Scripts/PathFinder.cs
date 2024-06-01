@@ -40,11 +40,11 @@ namespace Scripts {
                     Debug.Log("Processed: " + processed.Count);
                     return path;
                 }
-s
+
                 foreach (var neighbor in current.Neighbors.Where(t => t.Walkable && !processed.Contains(t))) {
                     var inSearch = toSearch.Contains(neighbor);
 
-                    var costToNeighbor = current.G + current.GetDistance(neighbor);
+                    var costToNeighbor = current.G + 1;
 
                     if (!inSearch || costToNeighbor < neighbor.G) {
                         neighbor.SetG(costToNeighbor);

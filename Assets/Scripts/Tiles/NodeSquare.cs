@@ -10,7 +10,7 @@ namespace Tiles
     {
         private static readonly List<Vector2> Dirs = new List<Vector2>() {
             new Vector2(0, 1), new Vector2(-1, 0), new Vector2(0, -1), new Vector2(1, 0),
-            // Don't want diagonal movements
+            // Don't want diagonal movments
             //new Vector2(1, 1), new Vector2(1, -1), new Vector2(-1, -1), new Vector2(-1, 1)
         };
 
@@ -39,6 +39,7 @@ namespace Tiles
 
             var horizontalMovesRequired = highest - lowest;
 
+            return dist.x + dist.y;
             return lowest * 14 + horizontalMovesRequired * 10 ;
         }
 
