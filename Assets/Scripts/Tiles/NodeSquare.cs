@@ -10,7 +10,7 @@ namespace Tiles
     {
         private static readonly List<Vector2> Dirs = new List<Vector2>() {
             new Vector2(0, 1), new Vector2(-1, 0), new Vector2(0, -1), new Vector2(1, 0),
-            // Don't want diagonal movments
+            // Don't want diagonal movements
             //new Vector2(1, 1), new Vector2(1, -1), new Vector2(-1, -1), new Vector2(-1, 1)
         };
 

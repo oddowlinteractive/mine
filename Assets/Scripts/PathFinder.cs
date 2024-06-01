@@ -44,6 +44,7 @@ namespace Scripts {
                 foreach (var neighbor in current.Neighbors.Where(t => t.Walkable && !processed.Contains(t))) {
                     var inSearch = toSearch.Contains(neighbor);
 
+                    // Not supporting diagonals so this will always increase by one
                     var costToNeighbor = current.G + 1;
 
                     if (!inSearch || costToNeighbor < neighbor.G) {
