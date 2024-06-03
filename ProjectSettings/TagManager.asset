@@ -38,8 +38,17 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Sky Backgrond
+  - name: Sky Backgronds
     uniqueID: 617735599
+    locked: 0
+  - name: Cave Backgrounds
+    uniqueID: 4218462287
+    locked: 0
+  - name: Building
+    uniqueID: 2194993189
+    locked: 0
+  - name: Units
+    uniqueID: 647152601
     locked: 0
   - name: Default
     uniqueID: 0

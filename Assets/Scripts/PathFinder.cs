@@ -41,7 +41,7 @@ namespace Scripts {
                     return path;
                 }
 
-                foreach (var neighbor in current.Neighbors.Where(t => t.Walkable && !processed.Contains(t))) {
+                foreach (var neighbor in current.Neighbors.Where(t => t.walkable && !processed.Contains(t))) {
                     var inSearch = toSearch.Contains(neighbor);
 
                     // Not supporting diagonals so this will always increase by one

@@ -1,47 +1,64 @@
 using System;
 using System.Collections.Generic;
+using Managers;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace Scripts.Tiles {
-    public abstract class NodeBase : MonoBehaviour {
-        [Header("References")] [SerializeField]
-        private Color _obstacleColor;
+    public abstract class NodeBase : MonoBehaviour
+    {
 
-        [SerializeField] private Gradient _walkableColor;
+        [Header("Managers")]
+        public UnitManager um;
+        
+        [Header("References")]
+        [SerializeField] private Color obstacleColor;
+
+        [SerializeField] private Gradient walkableColor;
         [SerializeField] protected SpriteRenderer _renderer;
+        public GameObject highlightPrefab;
+        public GameObject highlight;
      
         public ICoords Coords;
-        public float GetDistance(NodeBase other) => Coords.GetDistance(other.Coords); // Helper to reduce noise in pathfinding
-        public bool Walkable { get; set; }
-        private bool _selected;
+        public bool walkable;
+        public bool minable;
+        public bool selected ;
         private Color _defaultColor;
+        
+        public static event Action<NodeBase> Selected;
+        public static event Action<NodeBase> UnSelected;
+        
+        public float GetDistance(NodeBase other) => Coords.GetDistance(other.Coords); // Helper to reduce noise in pathfinding
 
-        public virtual void Init(bool walkable, ICoords coords) {
-            Walkable = walkable;
-
-            _renderer.color = walkable ? _walkableColor.Evaluate(Random.Range(0f, 1f)) : _obstacleColor;
-            _defaultColor = _renderer.color;
-
-            OnHoverTile += OnOnHoverTile;
-
+        public virtual void Init(bool _walkable, bool _minable, ICoords coords) {
+            this.walkable = _walkable;
+            this.minable = _minable;
             Coords = coords;
+
+            //_renderer.color = walkable ? walkableColor.Evaluate(Random.Range(0f, 1f)) : obstacleColor;
+            //_defaultColor = _renderer.color;
+
+
             transform.position = Coords.Pos;
         }
 
-        public static event Action<NodeBase> OnHoverTile;
-        private void OnEnable() => OnHoverTile += OnOnHoverTile;
-        private void OnDisable() => OnHoverTile -= OnOnHoverTile;
-        private void OnOnHoverTile(NodeBase selected) => _selected = selected == this;
-
-        protected virtual void OnMouseDown() {
-            if (!Walkable) return;
-            OnHoverTile?.Invoke(this);
+        public void Select()
+        {
+            selected = true;
+            um.AddMinable(this);
+            highlight = Instantiate(highlightPrefab, new Vector3(Coords.Pos.x+0.5f, Coords.Pos.y+0.5f, 0), Quaternion.identity);
+        }
+        
+        public void UnSelect()
+        {
+            selected = false;
+            um.RemoveMinable(this);
+            Destroy(highlight);
         }
 
         #region Pathfinding
-
 
         public List<NodeBase> Neighbors { get; protected set; }
         public NodeBase Connection { get; private set; }
@@ -62,8 +79,6 @@ namespace Scripts.Tiles {
         public void SetH(float h) {
             H = h;
         }
-
-        public void SetColor(Color color) => _renderer.color = color;
 
         #endregion
     }
