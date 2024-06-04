@@ -17,8 +17,9 @@ namespace Buildings
     public abstract class BuildingBase : MonoBehaviour
     {
         [Header("Managers")]
-        public GridManager gm;
-        public UnitManager um;
+        //FIXME set in init
+        public GridManager _gm;
+        public UnitManager _um;
         
         [Header("Building Data")]
         public new string name;

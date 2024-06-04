@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Managers;
 using TMPro;
+using Units;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -12,6 +13,7 @@ namespace Scripts.Tiles {
 
         [Header("Managers")]
         public UnitManager um;
+        public GridManager gm;
         
         [Header("References")]
         [SerializeField] private Color obstacleColor;
@@ -25,6 +27,7 @@ namespace Scripts.Tiles {
         public bool walkable;
         public bool minable;
         public bool selected ;
+        public UnitMiner miner;
         private Color _defaultColor;
         
         public static event Action<NodeBase> Selected;
@@ -56,6 +59,10 @@ namespace Scripts.Tiles {
             selected = false;
             um.RemoveMinable(this);
             Destroy(highlight);
+            miner.currentAction = MinerActions.None;
+            miner.currentState = MinerStates.Idle;
+            miner.tileToMine = null;
+            miner.currentTile = gm.GetTile(miner.transform.position);
         }
 
         #region Pathfinding

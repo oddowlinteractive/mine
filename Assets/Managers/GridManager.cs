@@ -68,8 +68,8 @@ namespace Managers
             var bLocation = new Vector3(80 + 0.5f, mapHeight + 1, 0.0f);
             var iBarracks = Instantiate(barracksPrefab, bLocation, Quaternion.identity);
             var b = iBarracks.GetComponent<BuildingBarracks>();
-            b.um = um;
-            b.gm = this;
+            b._um = um;
+            b._gm = this;
         }
 
         // Update is called once per frame
@@ -81,11 +81,13 @@ namespace Managers
                 //interactiveMap.SetTile(mousePos, hoverTile);
                 NodeBase uPos;
                 bool walking = false;
+                bool minning = false;
                 if (Tiles.TryGetValue(new Vector2((float)mData.Pos.x, (float)mData.Pos.y), out uPos))
                 {
                     walking = uPos.walkable;
+                    minning = uPos.minable;
                 }
-                Debug.Log("TILE: " + mData.Pos.x + " " + mData.Pos.y + " " + walking);
+                Debug.Log("TILE: " + mData.Pos.x + " " + mData.Pos.y + " W " + walking + " M " + minning);
             }
 
             if (Input.GetMouseButtonDown(0))
@@ -136,6 +138,26 @@ namespace Managers
             return null;
         }
         
+        public NodeBase GetTile(Vector3 data)
+        {
+            NodeBase retVal;
+            if (Tiles.TryGetValue(new Vector2(Mathf.Floor(data.x), Mathf.Floor(data.y)), out retVal))
+            {
+                return retVal;
+            }
+            return null;
+        }
+        
+        public NodeBase GetTile(Vector2 data)
+        {
+            NodeBase retVal;
+            if (Tiles.TryGetValue(data, out retVal))
+            {
+                return retVal;
+            }
+            return null;
+        }
+        
         public bool OnGrid(MouseData<Vector3Int> mData)
         {
             return (mData.Pos.x > 0 && mData.Pos.x < mapWidth && mData.Pos.y > 0 && mData.Pos.y < mapHeight + 1);
@@ -174,6 +196,7 @@ namespace Managers
                     var tile = Instantiate(nodeBasePrefab, grid.transform);
                     tile.Init(false, true, new SquareCoords{Pos = new Vector2(x, y)});
                     tile.um = um;
+                    tile.gm = this;
                     Tiles.Add(new Vector2(x,y),tile);
                 }
             }
@@ -183,6 +206,7 @@ namespace Managers
                 var tile = Instantiate(nodeBasePrefab,grid.transform);
                 tile.Init(true, false, new SquareCoords{Pos = new Vector2(x, mapHeight)});
                 tile.um = um;
+                tile.gm = this;
                 Tiles.Add(new Vector2(x, mapHeight),tile);
                 
             }

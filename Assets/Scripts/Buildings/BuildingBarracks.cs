@@ -25,8 +25,8 @@ namespace Buildings
         {
             var uLocation = new Vector3(transform.position.x, transform.position.y - .5f , 0.0f);
             var unit = Instantiate(unitMiner, uLocation, Quaternion.identity);
-            unit.Init();
-            um.AddMiner(unit);
+            unit.Init(_gm, _um);
+            _um.AddUnit(unit);
         }
             
     }

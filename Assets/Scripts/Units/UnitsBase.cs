@@ -1,4 +1,5 @@
 using Managers;
+using Scripts.Tiles;
 using UnityEngine;
 
 namespace Units
@@ -13,8 +14,8 @@ namespace Units
 
     public abstract class UnitsBase : MonoBehaviour
     {
-        [Header("Managers")]
-        public UnitManager um; 
+        protected GridManager _gm; 
+        protected UnitManager _um; 
         
         [Header("Unit Data")]
         public new string name;
@@ -25,6 +26,7 @@ namespace Units
 
         public Sprite unitSprite;
         public SpriteRenderer sr;
+        public NodeBase currentTile;
 
 
     }
