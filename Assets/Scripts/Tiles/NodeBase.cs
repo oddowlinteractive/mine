@@ -13,7 +13,7 @@ namespace Scripts.Tiles {
 
         [Header("Managers")]
         public UnitManager um;
-        public GridManager gm;
+        public GridManager _gm;
         
         [Header("References")]
         [SerializeField] private Color obstacleColor;
@@ -24,6 +24,7 @@ namespace Scripts.Tiles {
         public GameObject highlight;
      
         public ICoords Coords;
+        public int health;
         public bool walkable;
         public bool minable;
         public bool selected ;
@@ -35,10 +36,11 @@ namespace Scripts.Tiles {
         
         public float GetDistance(NodeBase other) => Coords.GetDistance(other.Coords); // Helper to reduce noise in pathfinding
 
-        public virtual void Init(bool _walkable, bool _minable, ICoords coords) {
-            this.walkable = _walkable;
-            this.minable = _minable;
+        public virtual void Init(bool _walkable, bool _minable, ICoords coords, int _health = 100) {
+            walkable = _walkable;
+            minable = _minable;
             Coords = coords;
+            health = _health;
 
             //_renderer.color = walkable ? walkableColor.Evaluate(Random.Range(0f, 1f)) : obstacleColor;
             //_defaultColor = _renderer.color;
@@ -62,7 +64,24 @@ namespace Scripts.Tiles {
             miner.currentAction = MinerActions.None;
             miner.currentState = MinerStates.Idle;
             miner.tileToMine = null;
-            miner.currentTile = gm.GetTile(miner.transform.position);
+            miner.currentTile = _gm.GetTile(miner.transform.position);
+        }
+
+        public void Mined()
+        {
+            selected = false;
+            um.RemoveMinable(this);
+            Destroy(highlight);
+            walkable = true;
+            minable = false;
+            var tile = _gm.GetTile(Coords.Pos);
+            _gm.tileMap.SetTile(new Vector3Int((int)Coords.Pos.x, (int)Coords.Pos.y ,0), null );
+            
+            miner.currentAction = MinerActions.None;
+            miner.currentState = MinerStates.Idle;
+            miner.tileToMine = null;
+            //miner.currentTile = _gm.GetTile(miner.transform.position);
+            miner = null;
         }
 
         #region Pathfinding

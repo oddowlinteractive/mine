@@ -2,6 +2,7 @@ using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Scripts;
 using Scripts.Tiles;
 using Units;
@@ -24,126 +25,121 @@ namespace Managers
         
         [Header("Managers")]
         public GridManager gm;
+        public TickManager tm;
         
         //[Header("Units")]
         //public UnitMiner unitMiner;
         
-        public Dictionary<Vector2, NodeBase> ToMine { get; private set; }
+        public List<NodeBase> ToMine { get; private set; }
         public List<UnitMiner> Miners { get; private set; }
         public List<UnitSolder> Solders { get; private set; }
 
         void Start()
         {
-            ToMine = new Dictionary<Vector2, NodeBase>();
+            TickManager.OnTick += OnTickUpdate;
+            ToMine = new List<NodeBase>();
             Miners = new List<UnitMiner>();
         }
 
-        private async void Update()
+        private void OnTickUpdate(Int64 tick)
         {
+            var taskM = ActionMiners();
+            //var taskS = ActionSolders();
+            Task.WhenAll(taskM);
+        }
+
+        private void SortTilesByDistance(List<NodeBase> tiles, NodeBase src)
+        {
+             tiles.Sort((x, y) =>
+            {
+                var xDst = (x.Coords.Pos - src.Coords.Pos).SqrMagnitude();
+                var yDst = (y.Coords.Pos - src.Coords.Pos).SqrMagnitude();
+                var so = xDst.CompareTo(yDst);
+                return so;
+            });
+        }
+        
+        private async Task ActionMiners()
+        {
+            var tasks = new List<Task>();
             foreach (var miner in Miners)
             {
                 if(miner.currentAction == MinerActions.None)
                 {
-                    foreach (var item in ToMine.ToArray())
+                    SortTilesByDistance(ToMine, miner.currentTile);
+                    //ToMine.Reverse();
+                    foreach (var tile in ToMine)
                     {
-                        foreach (var neighbor in item.Value.Neighbors)
+                        SortTilesByDistance(tile.Neighbors, miner.currentTile);
+                        foreach (var neighbor in tile.Neighbors)
                         {
-                            if (neighbor.walkable)
+                            if (neighbor.walkable) // and Make sure its the closest one.
                             {
-                                var pos = neighbor.transform.position;
-                                //miner.transform.position = new Vector3(pos.x + 0.5f , miner.transform.position.y, 0);
-                                item.Value.miner = miner;
-                                miner.currentAction = MinerActions.Mining;
-                                miner.currentState = MinerStates.Walking;
-                                miner.tileToMine = neighbor;
-                                var pathParts = GetPathParts(miner, neighbor);
-                                foreach (var part in pathParts)
-                                {
-                                    await miner.transform.DOMove(new Vector3(part.Dst.x + 0.5f, part.Dst.y + 0.5f, 0 ), 4)
-                                        .SetEase(Ease.Linear)
-                                        .SetSpeedBased(true)
-                                        .AsyncWaitForCompletion();
-                                }
+                                tasks.Add(miner.StartMiningWalkTo(tile, neighbor));
+                                goto DoneWithMiner;
                             }
                         }
                     }
                 }
-                else if (miner.currentAction == MinerActions.Mining)
-                {
-                    //if (!miner.tileToMine.minable)
-                    //{
-                    //    miner.currentAction = MinerActions.None;
-                    //    miner.currentState = MinerStates.Idle;
-                    //    miner.tileToMine = null;
-                    //    miner.currentTile = gm.GetTile(miner.transform.position);
-                    //}
-                }
+                DoneWithMiner: ;
             }
+
+            await Task.WhenAll(tasks);
         }
 
         public List<SimplePath> GetPathParts(UnitsBase unit, NodeBase dest)
         {
             var paths = Pathfinding.FindPath(unit.currentTile, dest);
+            // FindPath does not include the tile the unit is on.
+            paths.Add(unit.currentTile);
+            
             List<SimplePath> parts = new List<SimplePath>();
             Vector2 src = new Vector2();
             Vector2 dst = new Vector2();
-            PathDirection dir = PathDirection.Horizontal;
             for(var i = paths.Count - 1; i >= 0; i--)
             {
                 if (i == paths.Count-1)
                 {
                     src = paths[i].Coords.Pos;
+                    dst = src;
                     continue;
                 }
-
-                PathDirection nextDir;
-                if (Mathf.Approximately(src.x, paths[i].Coords.Pos.x))
+                
+                if (Mathf.Approximately(src.x, dst.x) && Mathf.Approximately(dst.x, paths[i].Coords.Pos.x))
                 {
-                    nextDir = PathDirection.Virtical;
+                    dst = paths[i].Coords.Pos;
                 }
-                else if (Mathf.Approximately(src.y, paths[i].Coords.Pos.y))
-                {
-                    nextDir = PathDirection.Horizontal;
-                }
-                else
-                {
-                    // FIXME: this should never happen... right?
-                    nextDir = dir;
-                }
-
-                if (i == paths.Count-2)
-                {
-                    dir = nextDir;
-                }
-
-                if (nextDir == dir)
+                else if (Mathf.Approximately(src.y, dst.y) && Mathf.Approximately(dst.y, paths[i].Coords.Pos.y))
                 {
                     dst = paths[i].Coords.Pos;
                 }
                 else
                 {
                     parts.Add(new SimplePath{Src = src, Dst = dst});
-                    src = paths[i].Coords.Pos;
+                    src = dst;
+                    dst = paths[i].Coords.Pos;
                 }
-
                 if (i == 0)
                 {
                     parts.Add(new SimplePath{Src = src, Dst = dst});
                 }
+                // FIXME: if next to dest finish.
                 
             }
-
             return parts;
         }
         
         public void AddMinable(NodeBase tile)
         {
-            ToMine.Add(tile.Coords.Pos, tile);
+            if(!ToMine.Exists(x => x.Coords.Pos == tile.Coords.Pos))
+            {
+                ToMine.Add(tile);
+            }
         }
         
         public void RemoveMinable(NodeBase tile)
         {
-            ToMine.Remove(tile.Coords.Pos);
+            ToMine.Remove(tile);
         }
 
         public void AddUnit(UnitMiner unit)

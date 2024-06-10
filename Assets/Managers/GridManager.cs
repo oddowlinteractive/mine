@@ -65,7 +65,7 @@ namespace Managers
             //unit.transform.position = new Vector3(5, (float)(127.0 + 9), 0);
             var bSprite = barracksPrefab.GetComponent<SpriteRenderer>();
             //var bLocation = new Vector3(80 - (bSprite.size.x / 2.0f), mapHeight - (bSprite.size.y / 2.0f), 0.0f);
-            var bLocation = new Vector3(80 + 0.5f, mapHeight + 1, 0.0f);
+            var bLocation = new Vector3(100 + 0.5f, mapHeight + 1, 0.0f);
             var iBarracks = Instantiate(barracksPrefab, bLocation, Quaternion.identity);
             var b = iBarracks.GetComponent<BuildingBarracks>();
             b._um = um;
@@ -87,7 +87,6 @@ namespace Managers
                     walking = uPos.walkable;
                     minning = uPos.minable;
                 }
-                Debug.Log("TILE: " + mData.Pos.x + " " + mData.Pos.y + " W " + walking + " M " + minning);
             }
 
             if (Input.GetMouseButtonDown(0))
@@ -125,6 +124,17 @@ namespace Managers
                     */
                 }
                 //var tile = tileMap.GetTile(tpos);
+            }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                if (OnGrid(mData))
+                {
+                    var clickedTile = GetTile(mData);
+                    clickedTile.minable = false;
+                    clickedTile.walkable = true;
+                    tileMap.SetTile(new Vector3Int(mData.Pos.x, mData.Pos.y ,0), null );
+                }
             }
         }
 
@@ -196,7 +206,7 @@ namespace Managers
                     var tile = Instantiate(nodeBasePrefab, grid.transform);
                     tile.Init(false, true, new SquareCoords{Pos = new Vector2(x, y)});
                     tile.um = um;
-                    tile.gm = this;
+                    tile._gm = this;
                     Tiles.Add(new Vector2(x,y),tile);
                 }
             }
@@ -206,7 +216,7 @@ namespace Managers
                 var tile = Instantiate(nodeBasePrefab,grid.transform);
                 tile.Init(true, false, new SquareCoords{Pos = new Vector2(x, mapHeight)});
                 tile.um = um;
-                tile.gm = this;
+                tile._gm = this;
                 Tiles.Add(new Vector2(x, mapHeight),tile);
                 
             }

@@ -22,8 +22,8 @@ namespace Tiles
             }
         }
 
-        public override void Init(bool walkable, bool minable, ICoords coords) {
-            base.Init(walkable, minable, coords);
+        public override void Init(bool walkable, bool minable, ICoords coords, int health = 100) {
+            base.Init(walkable, minable, coords, health);
         
             //_renderer.transform.rotation = Quaternion.Euler(0, 0, 90 * Random.Range(0, 4));
         }

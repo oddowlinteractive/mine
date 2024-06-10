@@ -21,7 +21,8 @@ namespace Scripts {
             while (toSearch.Any()) {
                 var current = toSearch[0];
                 foreach (var t in toSearch) 
-                    if (t.F < current.F || t.F == current.F && t.H < current.H) current = t;
+                    if (t.F < current.F || Mathf.Approximately(t.F, current.F) && t.H < current.H)
+                        current = t;
 
                 processed.Add(current);
                 toSearch.Remove(current);
@@ -37,7 +38,6 @@ namespace Scripts {
                         if (count < 0) throw new Exception();
                     }
                     
-                    Debug.Log("Processed: " + processed.Count);
                     return path;
                 }
 
@@ -58,8 +58,6 @@ namespace Scripts {
                     }
                 }
             }
-
-            Debug.Log("Processed: " + processed.Count);
             return null;
         }
     }

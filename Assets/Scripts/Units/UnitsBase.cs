@@ -4,6 +4,12 @@ using UnityEngine;
 
 namespace Units
 {
+
+    public enum UnitStates
+    {
+        Idle,
+        Walking,
+    }
     public enum UnitTypes
     {
         Miner,
@@ -21,7 +27,7 @@ namespace Units
         public new string name;
         public UnitTypes type;
         public int health;
-        public int attach;
+        public int attack;
         public int carryWeight;
 
         public Sprite unitSprite;
