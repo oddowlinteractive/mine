@@ -14,12 +14,6 @@ using UnityEngine;
 namespace Managers
 {
 
-    public enum PathDirection
-    {
-        Horizontal,
-        Virtical
-    }
-
     public class UnitManager : MonoBehaviour
     {
         

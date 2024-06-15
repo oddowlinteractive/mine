@@ -22,12 +22,11 @@ namespace Managers
         
         
         [Header("Tiles")]
-        public TileBase plains;
-        public TileBase forest;
-        public TileBase hills;
-        public TileBase mountains;
-        public TileBase sky;
-        public TileBase dirt;
+        public NodeBase granite;
+        public NodeBase coal;
+        public NodeBase iron;
+        public NodeBase copper;
+        public NodeBase dirt;
 
         
         [Header("Data")]
@@ -38,7 +37,7 @@ namespace Managers
         [SerializeField] private int yOffset = 0; // v- +^
         [SerializeField] private NodeBase nodeBasePrefab; 
         
-        private Dictionary<int, TileBase> _tileSet;
+        private Dictionary<int, NodeBase> _tileSet;
         public static GridManager Instance;
        
         public Dictionary<Vector2, NodeBase> Tiles { get; private set; }
@@ -179,12 +178,12 @@ namespace Managers
         {
             // Collect and assign ID codes to the tile prefabs, for ease of access. Best ordered to match land elevation.
      
-            _tileSet = new Dictionary<int, TileBase>();
-            _tileSet.Add(0, plains);
-            _tileSet.Add(1, forest);
-            _tileSet.Add(2, hills);
-            _tileSet.Add(3, mountains);
-            _tileSet.Add(4, sky);
+            _tileSet = new Dictionary<int, NodeBase>();
+            _tileSet.Add(0, iron);
+            _tileSet.Add(1, granite);
+            _tileSet.Add(2, granite);
+            _tileSet.Add(3, copper);
+            _tileSet.Add(4, iron);
             _tileSet.Add(5, dirt);
         }
         void GenerateMap()
@@ -201,11 +200,11 @@ namespace Managers
                 {
                     int tileID = GetIdUsingPerlin(x, y);
                     _noiseGrid[x].Add(tileID);
-                    tileMap.SetTile(new Vector3Int(x, y ,0), _tileSet[tileID] );
+                    tileMap.SetTile(new Vector3Int(x, y ,0), _tileSet[tileID].tile );
                     
-                    var tile = Instantiate(nodeBasePrefab, grid.transform);
-                    tile.Init(false, true, new SquareCoords{Pos = new Vector2(x, y)});
-                    tile.um = um;
+                    var tile = Instantiate(_tileSet[tileID], grid.transform);
+                    tile.Init(new SquareCoords{Pos = new Vector2(x, y)});
+                    tile._um = um;
                     tile._gm = this;
                     Tiles.Add(new Vector2(x,y),tile);
                 }
@@ -214,16 +213,16 @@ namespace Managers
             for (int x = 0; x < mapWidth; x++)
             {
                 var tile = Instantiate(nodeBasePrefab,grid.transform);
-                tile.Init(true, false, new SquareCoords{Pos = new Vector2(x, mapHeight)});
-                tile.um = um;
+                tile.Init(new SquareCoords{Pos = new Vector2(x, mapHeight)});
+                tile._um = um;
                 tile._gm = this;
+                tile.walkable = true;
                 Tiles.Add(new Vector2(x, mapHeight),tile);
-                
             }
                 
             for (int x = 0; x < 100; x++)
             {
-                tileMap.SetTile(new Vector3Int(x, mapWidth - 1 ,0), _tileSet[5] );
+                tileMap.SetTile(new Vector3Int(x, mapWidth - 1 ,0), _tileSet[5].tile );
                 NodeBase uPos;
                 if (Tiles.TryGetValue(new Vector2((float)x, (float)mapWidth - 1), out uPos))
                     uPos.walkable = false;

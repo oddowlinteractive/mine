@@ -17,13 +17,13 @@ namespace Tiles
         public override void CacheNeighbors() {
             Neighbors = new List<NodeBase>();
 
-            foreach (var tile in Dirs.Select(dir => GridManager.Instance.GetTileAtPosition(Coords.Pos + dir)).Where(tile => tile != null)) {
-                Neighbors.Add(tile);
+            foreach (var t in Dirs.Select(dir => GridManager.Instance.GetTileAtPosition(Coords.Pos + dir)).Where(t => t != null)) {
+                Neighbors.Add(t);
             }
         }
 
-        public override void Init(bool walkable, bool minable, ICoords coords, int health = 100) {
-            base.Init(walkable, minable, coords, health);
+        public override void Init(ICoords coords) {
+             base.Init(coords);
         
             //_renderer.transform.rotation = Quaternion.Euler(0, 0, 90 * Random.Range(0, 4));
         }
